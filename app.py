@@ -5,7 +5,7 @@ import customtkinter as ctk
 import sqlite3
 from pathlib import Path
 from tkinter import messagebox
-from decimal import Decimal, InvalidOperation
+from validacoes import converter_valor_centavos
 
 # Banco salvo na mesma pasta deste arquivo Python
 CAMINHO_BANCO = Path(__file__).resolve().parent / "oficina.db"
@@ -1049,26 +1049,12 @@ def abrir_ordens():
             return
 
         try:
-            valor = Decimal(texto_valor)
+            valor_centavos = converter_valor_centavos(texto_valor)
 
-            if not valor.is_finite() or valor < 0:
-                raise ValueError
-
-            centavos = valor * 100
-
-            if centavos != centavos.to_integral_value():
-                raise ValueError
-
-            if centavos > 9223372036854775807:
-                raise ValueError
-
-            valor_centavos = int(centavos)
-
-        except (InvalidOperation, ValueError):
+        except ValueError as erro:
             messagebox.showwarning(
                 "Valor inválido",
-                "Informe um valor positivo ou zero, com até duas "
-                "casas decimais. Exemplo: 150,50."
+                str(erro)
             )
             campo_valor.focus_set()
             return

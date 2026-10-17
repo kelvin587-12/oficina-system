@@ -6,6 +6,7 @@ import sqlite3
 from pathlib import Path
 from tkinter import messagebox
 from validacoes import converter_valor_centavos
+from banco import salvar_ordem_banco
 
 # Banco salvo na mesma pasta deste arquivo Python
 CAMINHO_BANCO = Path(__file__).resolve().parent / "oficina.db"
@@ -1060,17 +1061,13 @@ def abrir_ordens():
             return
 
         try:
-            with sqlite3.connect(CAMINHO_BANCO) as conexao:
-                conexao.execute("PRAGMA foreign_keys = ON")
-
-                cursor = conexao.execute("""
-                    INSERT INTO ordens_servico (
-                        veiculo_id, descricao, valor_centavos, status
-                    )
-                    VALUES (?, ?, ?, ?)
-                """, (veiculo_id, descricao, valor_centavos, status))
-
-                numero_ordem = cursor.lastrowid
+            numero_ordem = salvar_ordem_banco(
+                CAMINHO_BANCO,
+                veiculo_id,
+                descricao,
+                valor_centavos,
+                status
+            )
 
         except sqlite3.Error as erro:
             messagebox.showerror(
